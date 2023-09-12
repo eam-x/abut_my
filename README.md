@@ -9,3 +9,6 @@ ehsancity1383/ehsancity1383 is a ✨ special ✨ repository because its `README.
 You can click the Preview link to take a look at your changes.
 --->
 # تمامی پروژه ها جهت ذخیره و ارتقا هست
+قابلیت ارتقا در زمان معین
+قابل تغییر
+بدون حذف
